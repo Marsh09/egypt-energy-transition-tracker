@@ -1,0 +1,50 @@
+# Ingestion settings. No secrets here: the EIA key comes from the EIA_API_KEY
+# environment variable (see config/.env.example).
+# Relative paths are resolved against the repository root.
+#
+# Environment overrides: RAW_ROOT, LOGS_DIR, LOG_LEVEL, IRENA_SOURCE_PATH.
+
+raw_root: raw
+logs_dir: logs
+log_level: INFO
+
+http:
+  connect_timeout: 10       # seconds
+  read_timeout: 60          # seconds
+  max_retries: 5            # on 429, 500, 502, 503, 504 and connection errors
+  backoff_factor: 1.0       # sleeps 1s, 2s, 4s, 8s ... between retries
+  user_agent: egypt-energy-transition-tracker/1.0 (ingestion)
+
+eia:
+  base_url: https://api.eia.gov/v2
+  route: international/data
+  frequency: annual
+  country: EGY              # facets[countryRegionId][]
+  page_size: 5000           # EIA hard limit per request
+  start: null               # e.g. "1990" (null = everything available)
+  end: null
+  # Optional extra facets, e.g. narrow to specific products after exploring
+  # /v2/international/facet/productId in the notebook:
+  #   facets:
+  #     productId: ["..."]
+  #     activityId: ["..."]
+  #     unit: ["..."]
+  facets: {}
+
+worldbank:
+  base_url: https://api.worldbank.org/v2
+  country: EGY
+  per_page: 1000
+  date: null                # e.g. "1990:2024" (null = all years)
+  indicators:
+    - EG.FEC.RNEW.ZS        # Renewable energy consumption (% of total final energy consumption)
+    - EG.ELC.ACCS.ZS        # Access to electricity (% of population)
+    - EG.USE.PCAP.KG.OE     # Energy use (kg of oil equivalent per capita)
+
+irena:
+  enabled: true
+  # IRENA has no API used here: download the file manually and drop it in this
+  # folder (or point to one file). The newest .csv/.xlsx/.xls is used.
+  source_path: data/irena
+  dataset_version: null     # e.g. "IRENASTAT Renewable Capacity 2025", recorded in the manifest
+  download_date: null       # YYYY-MM-DD; if null the file's modified date is recorded

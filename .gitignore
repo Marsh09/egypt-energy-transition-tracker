@@ -1,0 +1,17 @@
+# secrets
+.env
+
+# generated data and logs (raw data is shared via the data lake, not Git)
+/raw/
+/logs/
+data/irena/*
+!data/irena/.gitkeep
+
+# python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+
+# notebooks
+.ipynb_checkpoints/

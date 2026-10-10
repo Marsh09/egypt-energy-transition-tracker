@@ -1,0 +1,74 @@
+{
+  "manifest_version": "1.0",
+  "run_id": "b2bdf1a38f3a45e98fe70069ec6e4079",
+  "source": "worldbank",
+  "ingest_date": "2000-01-01",
+  "started_at_utc": "2026-10-09T07:09:06+00:00",
+  "status": "success",
+  "finished_at_utc": "2026-10-09T07:09:06+00:00",
+  "request": {
+    "base_url": "http://127.0.0.1:8765/wb/v2",
+    "country": "EGY",
+    "indicators": [
+      "EG.FEC.RNEW.ZS",
+      "EG.ELC.ACCS.ZS",
+      "EG.USE.PCAP.KG.OE"
+    ],
+    "per_page": 1000,
+    "date": null
+  },
+  "details": {
+    "indicators": {
+      "EG.FEC.RNEW.ZS": {
+        "api_total_rows": 6,
+        "non_null_values": 5,
+        "pages": 1,
+        "year_min": "2015",
+        "year_max": "2020",
+        "source_lastupdated": "2025-01-28"
+      },
+      "EG.ELC.ACCS.ZS": {
+        "api_total_rows": 6,
+        "non_null_values": 5,
+        "pages": 1,
+        "year_min": "2015",
+        "year_max": "2020",
+        "source_lastupdated": "2025-01-28"
+      },
+      "EG.USE.PCAP.KG.OE": {
+        "api_total_rows": 6,
+        "non_null_values": 5,
+        "pages": 1,
+        "year_min": "2015",
+        "year_max": "2020",
+        "source_lastupdated": "2025-01-28"
+      }
+    }
+  },
+  "row_count": 18,
+  "files": [
+    {
+      "path": "worldbank/ingest_date=2000-01-01/worldbank_EG.FEC.RNEW.ZS_p001.json",
+      "bytes": 1503,
+      "sha256": "a1f152ea91c9f5261e98eac29275ae484ad4ee8c109bc30a3dc6363516e1eb3b",
+      "row_count": 6,
+      "action": "created"
+    },
+    {
+      "path": "worldbank/ingest_date=2000-01-01/worldbank_EG.ELC.ACCS.ZS_p001.json",
+      "bytes": 1503,
+      "sha256": "9845dd0df5eedb5e9863b83cbf90e79e4b50db0c12b2a4af5d128b17f95b808a",
+      "row_count": 6,
+      "action": "created"
+    },
+    {
+      "path": "worldbank/ingest_date=2000-01-01/worldbank_EG.USE.PCAP.KG.OE_p001.json",
+      "bytes": 1539,
+      "sha256": "6717b6af8ff69b5f9bbcc179e7eabf86067f8d9eb896dbf14ae8a8c2cacabd70",
+      "row_count": 6,
+      "action": "created"
+    }
+  ],
+  "pruned_files": [],
+  "error": null
+}
