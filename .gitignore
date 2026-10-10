@@ -3,7 +3,6 @@ eia_key.txt
 
 # generated
 /raw/
-ingestion.log
 irena/*
 !irena/.gitkeep
 

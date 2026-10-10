@@ -1,7 +1,7 @@
 # Raw Data Contract
 
 Owner: Ingestion (Member 1). Consumers: Transformation (Member 2), Cloud & Orchestration (Member 4).
-Version 1.1 (simplified single-script ingestion).
+Version 1.2 (minimal single-script ingestion).
 
 The raw layer holds what the sources sent, **unchanged**, plus a manifest saying where it came from and when.
 Nothing downstream may edit these files. If something looks wrong, fix it in Transformation and keep the raw file as evidence.
@@ -44,18 +44,13 @@ paths = [raw / f["path"] for f in manifest["files"]]
 |---|---|
 | `source` | `eia`, `worldbank` or `irena` |
 | `ingest_date` | Partition date (UTC) |
-| `status` | `success` (a manifest is only written for a successful run) |
-| `finished_at_utc` | When the run finished |
+| `status` | always `success` |
+| `finished_at_utc` | When the source finished |
 | `request` | What was asked: URL and parameters. **Never contains the API key** |
-| `details` | Source-specific facts (below) |
-| `row_count` | Total data rows over all files |
+| `row_count` | Total data rows over all files (IRENA: `0`, not counted) |
 | `files[]` | `path` (relative to `raw/`, forward slashes), `bytes`, `sha256`, `row_count` |
 
-`details` by source:
-
-- **eia**: `api_total_rows`, `units_seen`, `period_min`, `period_max`
-- **worldbank**: `indicators.<id>.api_total_rows`
-- **irena**: `original_filename`, `file_modified_date`
+IRENA also has `request.original_filename` (the name of the file you downloaded).
 
 `path` is relative to the raw root, so it is also the blob path if `raw/` is uploaded to a container.
 
@@ -81,7 +76,7 @@ Things Transformation must handle:
 - `dataFlagId` is set on about 8% of rows (estimated/forecast style flags); it is null otherwise. Decide whether to keep it.
 - Years run 1973 to 2025; most series cover 1980 to 2024, and 2025 has only 10 rows.
 - The pull is deliberately **complete**: 68 products x 13 activities, not only the five energy types in the spec. Choosing which series make up the energy mix is a Transformation decision, see `eia_series_guide.md`.
-- Pages are sorted by `period` ascending and together contain every row exactly once (`rows == api_total_rows` is checked before saving).
+- Pages are sorted by `period` ascending and together contain every row exactly once.
 
 ### World Bank: `worldbank_<INDICATOR>_p001.json`
 A JSON array `[meta, rows]`:
@@ -103,24 +98,23 @@ A JSON array `[meta, rows]`:
 
 ### IRENA: `irena_capacity.<ext>`
 The downloaded file copied byte-for-byte; the extension is kept. Columns are whatever IRENA's file has **(confirm after the first download)**.
-This source is optional: with no file in `data/irena/` the run reports `skipped`, writes nothing and still exits 0.
+This source is optional: with no file in the `irena/` folder nothing is written.
 
 ## 5. Guarantees
 
 1. **Unmodified**: files are the response bytes (EIA, World Bank) or a byte copy (IRENA). Checksums are in the manifest.
-2. **All or nothing per source**: everything is fetched and checked first (row totals match, no error payload) before anything is written. A failed fetch leaves the previous files alone.
-3. **Safe to re-run**: a same-day re-run replaces that day's folder and manifest. No duplicates, no leftovers.
-4. **No secrets** in files, manifests or the log. The key is read from `eia_key.txt` (git-ignored).
-5. **Failure is visible**: the failure goes to `ingestion.log` and the script exits with status 1. No manifest is written for a failed source.
+2. **No secrets** in files or manifests. The key is read from `eia_key.txt` (git-ignored).
+3. **Same-day re-run** overwrites the same file names. If the number of EIA pages ever shrinks, delete that day's folder first, or old extra pages stay behind. (In practice there are 4 pages.)
+
+Not guaranteed (the script is deliberately simple): no retries, no row-total check, no log file. A failed request stops the script with a message. If it stops, run it again. Check `row_count` in the manifest against what you expect (EIA: 16,404 on 2026-10-10).
 
 ## 6. For Cloud & Orchestration
 
 - Run: `python ingest.py` from the repo folder. Dependency: `pip install requests`.
-- Exit status `0` = every source succeeded or was skipped, `1` = at least one failed (alert on this).
 - The key is read from `eia_key.txt` next to the script. In a container or VM, write that file from the secret store before starting the job (for example `echo "$SECRET" > eia_key.txt`). Do not bake it into an image.
+- A failed request ends the script with an error, so a failed job shows up in the scheduler. A source that fails midway leaves earlier sources saved.
 - Upload `raw/` as it is: blob path = manifest `files[].path`. Upload `_manifests/` too.
 - Outbound access needed: `api.eia.gov` and `api.worldbank.org`.
-- Daily scheduling is safe because of guarantee 3.
 
 ## 7. Open items after the first real run
 
