@@ -14,7 +14,10 @@ INDICATORS = ["EG.FEC.RNEW.ZS", "EG.ELC.ACCS.ZS", "EG.USE.PCAP.KG.OE"]
 
 
 def get(url, params):
-    r = requests.get(url, params=params, timeout=60)
+    try:
+        r = requests.get(url, params=params, timeout=60)
+    except requests.RequestException as e:
+        raise SystemExit(f"{url} failed: {type(e).__name__}")
     if r.status_code != 200:
         raise SystemExit(f"{url} answered {r.status_code}")
     return r
