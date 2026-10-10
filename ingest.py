@@ -6,6 +6,7 @@ from pathlib import Path
 import requests
 
 HERE = Path(__file__).parent
+RAW = HERE.parent / "raw"
 TODAY = datetime.now(timezone.utc).date().isoformat()
 EIA_URL = "https://api.eia.gov/v2/international/data/"
 WB_URL = "https://api.worldbank.org/v2/country/EGY/indicator/"
@@ -27,7 +28,7 @@ class Ingestor:
         if not files:
             print(self.source, "- nothing to save")
             return
-        folder = HERE / "raw" / self.source / f"ingest_date={TODAY}"
+        folder = RAW / self.source / f"ingest_date={TODAY}"
         folder.mkdir(parents=True, exist_ok=True)
         entries = []
         for name, content, rows in files:
@@ -37,7 +38,7 @@ class Ingestor:
         manifest = {"source": self.source, "ingest_date": TODAY, "status": "success",
                     "finished_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
                     "request": request, "row_count": sum(e["row_count"] or 0 for e in entries), "files": entries}
-        manifests = HERE / "raw" / "_manifests"
+        manifests = RAW / "_manifests"
         manifests.mkdir(parents=True, exist_ok=True)
         (manifests / f"ingestion_manifest_{self.source}_{TODAY}.json").write_text(json.dumps(manifest, indent=2))
         print(self.source, "- saved", len(files), "file(s),", manifest["row_count"], "rows")

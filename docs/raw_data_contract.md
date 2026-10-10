@@ -11,6 +11,8 @@ Nothing downstream may edit these files. If something looks wrong, fix it in Tra
 
 ## 1. Layout
 
+`raw/` is created **next to the project folder**, not inside it (`RAW` in `ingest.py`).
+
 ```
 raw/
 ├── eia/ingest_date=YYYY-MM-DD/eia_<route>_<country>_<frequency>_p001.json   (p002, p003 ... if more than one page)

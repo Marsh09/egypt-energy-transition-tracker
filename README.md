@@ -1,7 +1,8 @@
 # Egypt Energy Transition Tracker: ingestion
 
 `ingest.py` downloads Egypt energy data from **EIA** and the **World Bank** (and a manual **IRENA** file, optional)
-and saves it unchanged in `raw/`, with a small manifest for every source.
+and saves it unchanged in a `raw` folder **next to this project folder** (outside the repo, so data never ends up in Git),
+with a small manifest for every source.
 
 ## Run it in VS Code
 
@@ -16,6 +17,8 @@ No `eia_key.txt`? The script asks you to paste the key instead.
 
 ## What you get
 
+If this project is in `Documents/egypt-energy-transition-tracker`, the data goes to `Documents/raw`:
+
 ```
 raw/
 ├── eia/ingest_date=YYYY-MM-DD/eia_international_egy_annual_p001.json (p002 ...)
@@ -26,6 +29,7 @@ raw/
 
 Files are exactly what the source sent. The manifest has the source, request, time, row count, file path and checksum.
 Running twice on the same day overwrites that day's files.
+To save somewhere else, change the `RAW = ...` line near the top of `ingest.py`.
 
 This script is deliberately bare: no retries, no logging and almost no error handling. If a request fails it
 stops with a short message (for example `... answered 403`, which means check the key). Just run it again.
