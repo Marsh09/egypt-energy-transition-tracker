@@ -1,4 +1,0 @@
--r requirements.txt
-pytest>=8.0
-pandas>=2.0      # notebooks / quick inspection only
-jupyter          # notebooks

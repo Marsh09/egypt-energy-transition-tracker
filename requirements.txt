@@ -1,4 +1,1 @@
-requests>=2.31
-PyYAML>=6.0
-python-dotenv>=1.0
-openpyxl>=3.1   # only used to count rows in an IRENA .xlsx file
+requests

@@ -43,11 +43,8 @@ Consequences:
 
 ## 5. Should the pull be narrowed?
 
-Not for now. The raw layer should be complete and it is only 5.5 MB. If we ever want a smaller pull, set `eia.facets` in `config/config.yaml`, for example:
+Not for now. The raw layer should be complete and it is only 5.5 MB. If we ever want a smaller pull, set `EIA_FACETS` at the top of `ingest.py`, for example:
 
-```yaml
-eia:
-  facets:
-    activityId: ["2", "7", "12"]
-    unit: ["QBTU", "BKWH", "MK"]
+```python
+EIA_FACETS = {"activityId": ["2", "7", "12"], "unit": ["QBTU", "BKWH", "MK"]}
 ```
