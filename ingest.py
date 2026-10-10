@@ -92,3 +92,4 @@ if __name__ == "__main__":
     key = key_file.read_text().strip() if key_file.exists() else input("Paste your EIA API key: ").strip()
     for ingestor in (EIAIngestor(key), WorldBankIngestor(), IRENAIngestor()):
         ingestor.run()
+    print("Saved in:", RAW.resolve())
