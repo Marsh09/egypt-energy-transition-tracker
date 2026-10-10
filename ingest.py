@@ -1,10 +1,3 @@
-"""
-Downloads Egypt energy data from EIA and the World Bank (plus an optional IRENA file) into raw/.
-
-In VS Code: press the Run (play) button. Needs:  pip install requests
-Your EIA key goes in a file called eia_key.txt next to this script.
-"""
-
 import hashlib
 import json
 from datetime import datetime, timezone
@@ -22,17 +15,15 @@ INDICATORS = ["EG.FEC.RNEW.ZS", "EG.ELC.ACCS.ZS", "EG.USE.PCAP.KG.OE"]
 def get(url, params):
     r = requests.get(url, params=params, timeout=60)
     if r.status_code != 200:
-        raise SystemExit(f"{url} answered {r.status_code}")   # no params printed, so the key stays hidden
+        raise SystemExit(f"{url} answered {r.status_code}")
     return r
 
 
 class Ingestor:
-    """Each source writes fetch(). Saving the files and the manifest is shared."""
-
     source = ""
 
     def run(self):
-        files, request = self.fetch()          # files = [(file name, bytes, row count), ...]
+        files, request = self.fetch()
         if not files:
             print(self.source, "- nothing to save")
             return
@@ -40,7 +31,7 @@ class Ingestor:
         folder.mkdir(parents=True, exist_ok=True)
         entries = []
         for name, content, rows in files:
-            (folder / name).write_bytes(content)          # exactly as received
+            (folder / name).write_bytes(content)
             entries.append({"path": f"{self.source}/ingest_date={TODAY}/{name}", "bytes": len(content),
                             "sha256": hashlib.sha256(content).hexdigest(), "row_count": rows})
         manifest = {"source": self.source, "ingest_date": TODAY, "status": "success",
@@ -62,7 +53,7 @@ class EIAIngestor(Ingestor):
         params = {"frequency": "annual", "data[0]": "value", "facets[countryRegionId][]": "EGY",
                   "sort[0][column]": "period", "sort[0][direction]": "asc", "length": 5000}
         files, offset = [], 0
-        while True:                            # EIA returns at most 5000 rows per call
+        while True:
             r = get(EIA_URL, {**params, "offset": offset, "api_key": self.key})
             body = r.json()["response"]
             rows = len(body["data"])
@@ -90,7 +81,7 @@ class IRENAIngestor(Ingestor):
     def fetch(self):
         found = [p for p in (HERE / "irena").glob("*.*") if p.suffix.lower() in (".csv", ".xlsx", ".xls")]
         if not found:
-            return [], {}                      # IRENA is optional: put the file in the irena folder
+            return [], {}
         file = max(found, key=lambda p: p.stat().st_mtime)
         return [(f"irena_capacity{file.suffix.lower()}", file.read_bytes(), None)], {"original_filename": file.name}
 
